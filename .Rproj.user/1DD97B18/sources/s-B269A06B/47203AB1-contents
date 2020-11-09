@@ -1,0 +1,10 @@
+library(tidyverse)
+
+tidy_anes <- read_rds("tidy-cdf.rds")%>%
+	select(year,
+				 pid_3
+				 pid_str,
+				 race,
+				 religion,
+				 )
+	glimpse()
