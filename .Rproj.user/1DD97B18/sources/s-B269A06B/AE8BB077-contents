@@ -6,25 +6,44 @@ library(rio)
 
 #2016
 df2016 <- rio::import("data/anes_timeseries_2016.zip", which = "anes_timeseries_2016_rawdata.txt")%>%
-  rename(weight = V160101,
+  select(weight = V160101,
          race = V161310x,
+         social_classa = V161307, #Self-reported social class, 1-4 lower, working, middle, upper. -1, -8, -9 NA
+         social_classb = V162133, #Self-reported social class, 1-4 lower, working, middle, upper. -1, -8, -9 NA
          general_vote = V161026, #Did R vote for president in the general?
-         general_vote_choice = V161027, #For whom did R vote for president
+         general_vote_choice = V161027, #For whom did R vote for president (NA if they didn't vote)
          primary_vote = V161021, #Did R vote in the Primary?
          primary_vote_choice = V161021a, # for whom did R vote in the primary
          therm_dem = V161095, #1-100, 100 warmest. -99: NA
          therm_rep = V161096, #1-100, 100 warmest. -99: NA
-         pid_7 = V161158x, # Does R think of themeselves as a Dem, Rep, Ind or what? We are using this in addition to registration because we are interested in people's conceptions of party This is coded 1: strong-dem, 2: weak-dem 3: ind-dem, 4: ind, 5: ind-rep, 6: weak-rep, 7: strong-rep -8 DK, -9 NA
+         pid_7 = V161158x, # Does R think of themselves as a Dem, Rep, Ind or what?  This is coded 1: strong-dem, 2: weak-dem 3: ind-dem, 4: ind, 5: ind-rep, 6: weak-rep, 7: strong-rep -8 DK, -9 NA
          pid_3 = V161155#, #Party ID: Does R think of self as Dem, Rep, Ind or what 0: no pref, 1. Democrat, 2. Republican, 3. Independent
   )%>%
-  select(weight,
-         primary_vote,
-         primary_vote_choice, # Pulling out the variables we just renamed from the massive dataset
-         therm_dem,
-         therm_rep,
-         pid_7,
-         pid_3
-  )%>%
+  mutate(social_classa = recode(social_classa, .default = NA_character_,
+                               "1" = "Lower Class",
+                               "2" = "Working Class",
+                               "3" = "Middle Class",
+                               "4" = "Upper Class"))%>%
+  mutate(social_classb = recode(social_classb, .default = NA_character_,
+                                "1" = "Lower Class",
+                                "2" = "Working Class",
+                                "3" = "Middle Class",
+                                "4" = "Upper Class"))%>%
+  mutate(social_class = if_else(is.na(social_classa), social_classb, social_classa))%>% #2016 ANES used two different question setsfor social class, I'm just uniting them here.
+  mutate(social_class = factor(social_class, 
+                               levels = c("Lower Class",
+                                          "Working Class",
+                                          "Middle Class",
+                                          "Upper Class")))%>%
+  select(-social_classa,
+         -social_classb)%>%
+  mutate(race = recode(race, .default = NA_character_,
+                       "1" = "White",
+                       "2" = "Black",
+                       "3" = "Asian/Pacific Islander",
+                       "4" = "Indigenous Americans",
+                       "5" = "Hispanic",
+                       "6" = "Other"))%>%
   mutate(pid_7 = na_if(pid_7, -9),
          pid_7 = na_if(pid_7, -8))%>%
   mutate(pid_7_num = as.numeric(pid_7), # Recoding party_id as a factor, making sure to order it in a substantive way.
@@ -35,8 +54,7 @@ df2016 <- rio::import("data/anes_timeseries_2016.zip", which = "anes_timeseries_
                         "4" = "Independent - Independent", 
                         "5" = "Independent - Republican", 
                         "6" = "Weak Republican", 
-                        "7" = "Strong Republican"
-         ), # We are leaving off `"-9" = NA`, because we have already set na_if(pid_7, -9) above.
+                        "7" = "Strong Republican"), 
          pid_7 = reorder(pid_7, pid_7_num))%>%
   mutate(pid_3 = recode(pid_3, 
                         "0" = "No Preference", 
@@ -76,8 +94,9 @@ df2016 <- rio::import("data/anes_timeseries_2016.zip", which = "anes_timeseries_
                                       "9" = "A Third Party Candidate",
                                       "-8" = NA_character_, #"Don't Know",
                                       "-9" = NA_character_#"Refused"
-  ))%>%
-  mutate(primary_vote_choice = as.factor(if_else(is.na(primary_vote_choice) & primary_vote_dum == 0, "Didn't Vote", primary_vote_choice)))%>%
+                                      ))%>%
+  mutate(primary_vote_choice = as.factor(if_else(is.na(primary_vote_choice) & primary_vote_dum == 0, "Didn't Vote",
+                                                 primary_vote_choice)))%>%
   mutate(cand_party = recode(primary_vote_choice, .default = NA_character_,
                              "Hillary Clinton" = "Democrat",
                              "Bernie Sanders" = "Democrat",
