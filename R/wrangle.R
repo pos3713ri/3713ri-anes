@@ -148,8 +148,8 @@ df <- rio::import("data/anes_timeseries_2016.zip", which = "anes_timeseries_2016
          party_id_7cat,
          starts_with("ft_"))%>%
   glimpse()%>%#
-  write_rds("data/tidy-2016.rds")%>%
-  write_csv("data/tidy-2016.csv") %>%
+  write_rds("data/anes-2016.rds")%>%
+  write_csv("data/anes-2016.csv") %>%
   glimpse()
 
 
