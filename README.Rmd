@@ -1,0 +1,6 @@
+# A Tidied Version of the 2016 ANES
+
+This data set is a practice data set for my undergraduate research methods class.
+
+You can download the by clicking below.
+

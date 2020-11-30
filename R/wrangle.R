@@ -12,7 +12,7 @@ clean_ft <- function(ft) {
 }
 
 #2016
-df <- rio::import("data/anes_timeseries_2016.zip", which = "anes_timeseries_2016_rawdata.txt")%>%
+df <- rio::import("raw-data/anes_timeseries_2016.zip", which = "anes_timeseries_2016_rawdata.txt")%>%
   select(weight = V160101,
          race = V161310x,
          social_classa = V161307, #Self-reported social class, 1-4 lower, working, middle, upper. -1, -8, -9 NA
@@ -148,8 +148,8 @@ df <- rio::import("data/anes_timeseries_2016.zip", which = "anes_timeseries_2016
          party_id_7cat,
          starts_with("ft_"))%>%
   glimpse()%>%#
-  write_rds("data/anes-2016.rds")%>%
-  write_csv("data/anes-2016.csv") %>%
+  write_rds("anes-2016.rds")%>%
+  write_csv("anes-2016.csv") %>%
   glimpse()
 
 
