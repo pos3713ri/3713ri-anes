@@ -4,21 +4,94 @@ library(stringr)
 library(rio)
 
 
+clean_ft <- function(ft) {
+  ft_new <- case_when(ft >= 0 & ft <= 100 ~ ft,
+                      ft < 0 ~ NA_integer_,
+                      ft > 100 ~ NA_integer_)
+  return(ft_new)
+}
+
 #2016
-df2016 <- rio::import("data/anes_timeseries_2016.zip", which = "anes_timeseries_2016_rawdata.txt")%>%
+df <- rio::import("data/anes_timeseries_2016.zip", which = "anes_timeseries_2016_rawdata.txt")%>%
   select(weight = V160101,
          race = V161310x,
          social_classa = V161307, #Self-reported social class, 1-4 lower, working, middle, upper. -1, -8, -9 NA
          social_classb = V162133, #Self-reported social class, 1-4 lower, working, middle, upper. -1, -8, -9 NA
-         general_vote = V162034, #Did R vote for president in the general?
-         general_vote_choice = V162034a, #For whom did R vote for president (NA if they didn't vote)
-         primary_vote = V161021, #Did R vote in the Primary?
-         primary_vote_choice = V161021a, # for whom did R vote in the primary
-         therm_dem = V161095, #1-100, 100 warmest. -99: NA
-         therm_rep = V161096, #1-100, 100 warmest. -99: NA
+         education = V161270,
+         age = V161267,
+         sex = V161342,
+         income = V161361x,
+         religion = V161265x,
+         religious_service_freq = V161245,
          party_id_7cat = V161158x, # Does R think of themselves as a Dem, Rep, Ind or what?  This is coded 1: strong-dem, 2: weak-dem 3: ind-dem, 4: ind, 5: ind-rep, 6: weak-rep, 7: strong-rep -8 DK, -9 NA
-         party_id_3cat = V161155#, #Party ID: Does R think of self as Dem, Rep, Ind or what 0: no pref, 1. Democrat, 2. Republican, 3. Independent
-  )%>%
+         party_id_3cat = V161155,
+         ft_hillary_clinton = V162078, #1-100, 100 warmest. -99: NA
+         ft_donald_trump = V162079,#, #1-100, 100 warmest. -99: NA
+         ft_libertarian_pres_cand = V162080,
+         ft_green_pres_cand = V162081,
+         ft_john_roberts = V162093,
+         ft_pope_francis = V162094,
+         ft_christian_fundamentalists = V162095,
+         ft_feminists = V162096,
+         ft_liberals = V162097,
+         ft_labor_unions = V162098,
+         ft_poor_people = V162099,
+         ft_big_business = V162100,
+         ft_conservatives = V162101,
+         ft_us_supreme_court = V162102,
+         ft_gay_men_and_lesbians = V162103,
+         ft_congress = V162104,
+         ft_rich_people = V162105,
+         ft_muslims = V162106,
+         ft_christians = V162107,
+         ft_jews = V162108,
+         ft_tea_party = V162109,
+         ft_police = V162110,
+         ft_transgender_people = V162111,
+         ft_scientists = V162112,
+         ft_black_lives_matter = V162113
+         
+         #Party ID: Does R think of self as Dem, Rep, Ind or what 0: no pref, 1. Democrat, 2. Republican, 3. Independent
+         
+         )%>% 
+  mutate(age = na_if(age, -9)) %>%
+  mutate(sex2 = sex,
+         sex = recode(sex, 
+                      "1" = "Male",
+                      "2" = "Female",
+                      "3" = "Other",
+                      "-9" = NA_character_),
+         sex = reorder(sex, sex2)) %>% 
+  mutate(religion = recode(religion, 
+                           "1" = "Mainline Protestant",
+                           "2" = "Evangelical Protestant",
+                           "3" = "Black Protestant",
+                           "4" = "Roman Catholic",
+                           "5" = "Undifferentiated Christian",
+                           "6" = "Jewish",
+                           "7" = "Other Religion",
+                           "8" = "Not Religious",
+                           "-2" = NA_character_)) %>%
+  mutate(rsf2 = religious_service_freq,
+         religious_service_freq= recode(religious_service_freq, 
+                           "1" = "Every Week",
+                           "2" = "Almost Every Week",
+                           "3" = "Once or Twice a Month",
+                           "4" = "A Few Times a Year",
+                           "5" = "Never",
+                           "-1" = NA_character_,
+                           "-9" = NA_character_),
+         religious_service_freq = reorder(religious_service_freq, -rsf2)) %>%
+  mutate(income_category = case_when(income == -9 ~ NA_character_,
+                                    income <= 14 ~ "Less than $50k",
+                                    income > 14 & income <= 22 ~ "Between $50k and $100k",
+                                    income > 22 & income <= 27~ "Between $100k and $250k",
+                                    income >= 28 ~ "More than $250k"),
+         income_category = reorder(income_category, income)) %>%
+  mutate(college_degree = case_when(education == -9 ~ NA_character_,
+                                    education <= 12 ~ "No College Degree",
+                                    education > 12 ~ "College Degree"),
+         college_degree = reorder(college_degree, education)) %>%
   mutate(social_classa = recode(social_classa, .default = NA_character_,
                                "1" = "Lower Class",
                                "2" = "Working Class",
@@ -48,9 +121,9 @@ df2016 <- rio::import("data/anes_timeseries_2016.zip", which = "anes_timeseries_
          party_id_7cat = recode(party_id_7cat, .default = NA_character_,
                         "1" = "Strong Democrat", 
                         "2" = "Weak Democrat", 
-                        "3" = "Independent - Democrat", 
-                        "4" = "Independent - Independent", 
-                        "5" = "Independent - Republican", 
+                        "3" = "Independent, leans Democrat", 
+                        "4" = "Independent, leans neither", 
+                        "5" = "Independent, leans Republican", 
                         "6" = "Weak Republican", 
                         "7" = "Strong Republican"), 
          party_id_7cat = reorder(party_id_7cat, party_id_7cat_num))%>%
@@ -62,67 +135,22 @@ df2016 <- rio::import("data/anes_timeseries_2016.zip", which = "anes_timeseries_
                         "5" = "Other",
                         "-8" = NA_character_,
                         "-9" = NA_character_))%>%
-  mutate(therm_dem = na_if(therm_dem, -99),
-         therm_dem = na_if(therm_dem, -88),
-         therm_dem = na_if(therm_dem, -89))%>%
-  mutate(therm_rep = na_if(therm_rep, -99),
-         therm_rep = na_if(therm_rep, -88),
-         therm_rep = na_if(therm_rep, -89))%>%
-  mutate(therm_inparty = case_when(party_id_3cat == "Democrat" ~ therm_dem,
-                                   party_id_3cat == "Republican" ~ therm_rep,
-                                   TRUE ~ NA_integer_))%>%
-  mutate(therm_outparty = case_when(party_id_3cat == "Democrat" ~ therm_rep,
-                                    party_id_3cat == "Republican" ~ therm_dem,
-                                    TRUE ~ NA_integer_))%>%
-  mutate(general_vote_dummy = as.numeric(recode(general_vote, .default = NA_character_,
-                                   "1" = "1",
-                                   "2" = "0")))%>%
-  select(-general_vote)%>%
-  mutate(general_vote_choice = as.factor(recode(general_vote_choice, .default = NA_character_,
-                                      "1" = "Hillary Clinton",
-                                      "2" = "Donald Trump",
-                                      "3" = "Gary Johnson",
-                                      "4" = "Jill Stein",
-                                      "5" = "Other",
-                                      "7" = "Other",
-                                      "9" = "Other")))%>%
-  mutate(primary_vote_dummy = as.numeric(recode(primary_vote,
-                                   "1" = "1",
-                                   "2" = "0",
-                                   "-8" = NA_character_,
-                                   "-9" = NA_character_)))%>%
-  select(-primary_vote)%>%
-  mutate(primary_vote_choice = recode(primary_vote_choice, # Unlike the factor vectors above, I'm not reorder this one, as there's nothing
-                                      "-1" = NA_character_,
-                                      "1" = "Hillary Clinton", #substantively meaningful about Hillary being "1" and Marco being "7"
-                                      "2" = "Bernie Sanders",
-                                      "3" = "Another Democrat",
-                                      "4" = "Donald Trump",
-                                      "5" = "Ted Cruz",
-                                      "6" = "John Kasich",
-                                      "7" = "Marco Rubio",
-                                      "8" = "Another Republican",
-                                      "9" = "A Third Party Candidate",
-                                      "-8" = NA_character_, #"Don't Know",
-                                      "-9" = NA_character_#"Refused"
-                                      ))%>%
-  mutate(primary_vote_choice = as.factor(if_else(is.na(primary_vote_choice) & primary_vote_dummy == 0, "Didn't Vote",
-                                                 primary_vote_choice)))%>%
+  mutate(across(starts_with("ft_"), clean_ft)) %>%
   select(social_class, #just re-selecting to put the cols in a nicer order
          race,
-         general_vote_dummy,
-         primary_vote_dummy,
-         general_vote_choice,
-         primary_vote_choice,
-         party_id_7cat,
+         age,
+         sex, 
+         college_degree,
+         income_category,
+         religion,
+         religious_service_freq,
          party_id_3cat,
-         therm_dem,
-         therm_rep,
-         therm_inparty,
-         therm_outparty)%>%
+         party_id_7cat,
+         starts_with("ft_"))%>%
   glimpse()%>%#
   write_rds("data/tidy-2016.rds")%>%
-  write_csv("data/tidy-2016.csv")
+  write_csv("data/tidy-2016.csv") %>%
+  glimpse()
 
 
 ###########################
