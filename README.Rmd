@@ -2,5 +2,8 @@
 
 This data set is a practice data set for my undergraduate research methods class.
 
-You can download the by clicking below.
+You can download the data set by clicking the instructions below.
+
+- For the CSV version, right-click on this [link](https://raw.githubusercontent.com/pos3713ri/3713ri-anes/main/anes-2016.csv) and choose *Save Link As...*. Save the file to the appropriate directory on your computer. The CSV file does not store information about factor levels, so you may prefer the RDS version.
+- For the RDS version, click [here](https://github.com/pos3713ri/3713ri-anes/raw/main/anes-2016.rds) and choose *Save Link As...*. Save the file to the appropriate directory on your computer. The CSV file does not store information about factor levels, so you may prefer the RDS version.
 
