@@ -1,9 +1,39 @@
+---
+output: github_document
+---
+
 # A Tidied Version of the 2016 ANES
 
 This data set is a practice data set for my undergraduate research methods class.
 
+Once you've started a *New Project...* in RStudio and created a `data/` sub-directory in the project directory, you can add this data set to the `data/` subdirectory. 
+
 You can download the data set by clicking the instructions below.
 
-- For the CSV version, right-click on this [link](https://raw.githubusercontent.com/pos3713ri/3713ri-anes/main/anes-2016.csv) and choose *Save Link As...*. Save the file to the appropriate directory on your computer. The CSV file does not store information about factor levels, so you may prefer the RDS version.
-- For the RDS version, click [here](https://github.com/pos3713ri/3713ri-anes/raw/main/anes-2016.rds) and choose *Save Link As...*. Save the file to the appropriate directory on your computer. The CSV file does not store information about factor levels, so you may prefer the RDS version.
+- For the CSV version, right-click on this [link](https://github.com/pos3713ri/3713ri-anes/raw/main/data/anes-2016.csv) and choose *Save Link As...*. Save the file to the `data/` subdirectory on your computer. The CSV file does not store information about factor levels, so you may prefer the RDS version.
+- For the RDS version, right-click on this [link](https://github.com/pos3713ri/3713ri-anes/raw/main/data/anes-2016.rds) and choose *Save Link As...*. Save the file to the `data/` subdirectory on your computer. The CSV file does not store information about factor levels, so you may prefer the RDS version.
 
+Once you've added the data set to the `data/` subdirectory, you can load it in RStudio with the following:
+
+```{r message=FALSE, warning=FALSE}
+# load packages
+library(tidyverse)
+
+# load data
+anes <- read_rds("data/anes-2016.rds")
+
+# quick look
+glimpse(anes)
+```
+
+The variables with the prefix `ft_` are feeling thermometers, which are asked in the following way:
+
+> I'd like to get your feelings toward some of our political leaders and other people who are in the news these days. I'll read the name of a person and I'd like you to rate that person using something we call the feeling thermometer.
+
+> Ratings between 50 degrees and 100 degrees mean that you feel favorable and warm toward the person. Ratings between 0 degrees and 50 degrees mean that you don't feel favorable toward the person and that you don't care too much for that person. You would rate the person at the 50 degree mark if you don't feel particularly warm or cold toward the person.
+
+> If we come to a person whose name you don't recognize, you don't need to rate that person. Just tell me and we'll move on to the next one.
+
+For example, the variable `ft_black_lives_matter` asks respondents to rate their feelings toward the Black Lives Matter movement from 0 (very cold) to 100 (very warm).
+
+The remaining variables are (hopefully) names well enough to self-explain.
