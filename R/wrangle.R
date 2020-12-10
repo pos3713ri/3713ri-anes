@@ -54,7 +54,8 @@ df <- rio::import("raw-data/anes_timeseries_2016.zip", which = "anes_timeseries_
          #Party ID: Does R think of self as Dem, Rep, Ind or what 0: no pref, 1. Democrat, 2. Republican, 3. Independent
          
          )%>% 
-  mutate(age = na_if(age, -9)) %>%
+  mutate(age = na_if(age, -9),
+         age = na_if(age, -8)) %>%
   mutate(sex2 = sex,
          sex = recode(sex, 
                       "1" = "Male",
@@ -152,6 +153,7 @@ df <- rio::import("raw-data/anes_timeseries_2016.zip", which = "anes_timeseries_
   write_csv("data/anes-2016.csv") %>%
   glimpse()
 
+skimr::skim(df)
 
 ###########################
 ###########################

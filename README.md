@@ -10,12 +10,12 @@ sub-directory in the project directory, you can add this data set to the
 
 You can download the data set by clicking the instructions below.
 
-  - For the CSV version, right-click on this
+-   For the CSV version, right-click on this
     [link](https://github.com/pos3713ri/3713ri-anes/raw/main/data/anes-2016.csv)
     and choose *Save Link As…*. Save the file to the `data/`
     subdirectory on your computer. The CSV file does not store
     information about factor levels, so you may prefer the RDS version.
-  - For the RDS version, right-click on this
+-   For the RDS version, right-click on this
     [link](https://github.com/pos3713ri/3713ri-anes/raw/main/data/anes-2016.rds)
     and choose *Save Link As…*. Save the file to the `data/`
     subdirectory on your computer. The CSV file does not store
